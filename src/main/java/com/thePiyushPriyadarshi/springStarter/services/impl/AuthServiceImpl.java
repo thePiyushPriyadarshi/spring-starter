@@ -8,11 +8,14 @@ import com.thePiyushPriyadarshi.springStarter.entities.User;
 import com.thePiyushPriyadarshi.springStarter.repositories.UserRepository;
 import com.thePiyushPriyadarshi.springStarter.security.JwtService;
 import com.thePiyushPriyadarshi.springStarter.services.AuthService;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -37,13 +40,26 @@ public class AuthServiceImpl implements AuthService {
        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(),loginRequestDto.getPassword())
         );
+
+       User user = (User) authentication.getPrincipal();
        return LoginResponseDto.builder()
-               .accessToken(jwtService.generateToken(authentication)).build();
+               .accessToken(jwtService.generateAccessToken(user))
+               .refreshToken(jwtService.generateRefreshToken(user))
+               .build();
     }
 
     @Override
     public UserDto getCurrentUser() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return modelMapper.map(user,UserDto.class);
+    }
+
+    @Override
+    public LoginResponseDto refresh(String refreshToken) {
+
+        Long userId = jwtService.getUserIdFromRefreshToken(refreshToken);
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new AuthenticationServiceException("User not found"));
+        return LoginResponseDto.builder().refreshToken(refreshToken).accessToken(jwtService.generateAccessToken(user)).build();
     }
 }

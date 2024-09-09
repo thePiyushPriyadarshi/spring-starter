@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class WebSecurityConfig {
 
-    private static final String[] PUBLIC_ROUTES = {"/auth/**","/swagger-ui/**","/v3/api-docs"};
+    private static final String[] PUBLIC_ROUTES = {"/auth/**","/swagger-ui/**","/v3/api-docs/**"};
     private final JwtAuthFilter jwtAuthFilter;
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -30,7 +30,7 @@ public class WebSecurityConfig {
                   .csrf(AbstractHttpConfigurer::disable)
                   .authorizeHttpRequests(auth -> auth
                                   .requestMatchers(PUBLIC_ROUTES).permitAll()
-                                  .requestMatchers("/auth/protected").authenticated()
+//                                  .requestMatchers("/auth/protected").authenticated()
                                   .anyRequest().authenticated())
                   .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

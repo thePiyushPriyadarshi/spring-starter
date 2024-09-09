@@ -1,5 +1,6 @@
 package com.thePiyushPriyadarshi.springStarter.services;
 
+import com.thePiyushPriyadarshi.springStarter.dto.UserDto;
 import com.thePiyushPriyadarshi.springStarter.entities.User;
 import com.thePiyushPriyadarshi.springStarter.exceptions.ResourceNotFoundException;
 import com.thePiyushPriyadarshi.springStarter.repositories.UserRepository;
@@ -22,6 +23,7 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(()->
                 new BadCredentialsException("User with email "+username+" not found"));
     }
+
 
     public User getUserById(Long id){
         return userRepository.findById(id).orElseThrow(()->
